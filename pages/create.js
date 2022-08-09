@@ -1,9 +1,54 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
+import "react-datepicker/dist/react-datepicker.css"
+
+
+import DatePicker from "react-datepicker";
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 
 import Head from 'next/head'
+import React, { useState } from "react";
+
 
 export default function Create() {
+  const [startDate, setStartDate] = useState(new Date());
+
+  const [query, setQuery] = useState({
+    name: "",
+    email: "",
+    cpf: "",
+    expireDate: ""
+  });
+
+  const requestCardCode = async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData();
+
+    Object.entries(query).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    // fetch("https://getform.io/{your-form-endpoint}", {
+    //   method: "POST",
+    //   body: formData
+    // }).then(() => setQuery({ name: "", email: "", message: "" }));
+
+    console.log(formData);
+  };
+
+  let sock = new SockJS("http://localhost:8080/stomp");
+
+  let client = Stomp.over(sock);
+
+  client.connect({}, frame => {
+    client.subscribe("/topic/user-waiting-card", payload => {
+      console.log(payload.body);
+    });
+  });
+
+
   return (
     <div>
       <Head>
@@ -16,7 +61,40 @@ export default function Create() {
         <nav className="navbar navbar-home navbar-expand-lg navbar-dark bg-primary">
           <a className="navbar-brand" href="#">Controle de Acesso - Cadastro</a>
         </nav>
+      </div>
 
+      <div className="container">
+        
+        <form onSubmit={requestCardCode}>
+          <div className="form-group">
+            <label>Nome:</label>
+            <input type="text" id="name" name="name"  className="form-control"/>
+          </div>
+
+          <div className="form-group">
+          <label>CPF:</label>
+          <input type="text" id="cpf" name="cpf" className="form-control"/>
+          </div>
+
+          <div className="form-group">
+            <label>E-Mail:</label>
+            <input type="email" id="email" name="email" className="form-control"/>
+          </div>
+
+          <div className="form-group">
+            <label>Data de expiração:</label>
+            <DatePicker selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              className="form-control"/>
+
+            {/* <input type="date" id="expire_date" name="expire_date" className="form-control"/> */}
+          </div>
+
+          <div className="form-group">
+            <br/>
+            <button type="submit" className="btn btn-success">Salvar</button>  
+          </div>
+        </form>
       </div>
     </div>
   )

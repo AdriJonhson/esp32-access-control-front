@@ -2,10 +2,34 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
 import Head from 'next/head'
-import Link from 'next/link';
+import Link from 'next/link'
+
+import NextCors from 'nextjs-cors'
+
+
+import React, { useState, useEffect } from 'react';
 
 
 export default function Home() {
+  const [data, setData] = useState([])
+
+  // const URL = 'http://147.182.191.7:8080/api/users';
+  const URL = 'http://localhost:8080/api/users';
+
+  const fetchData = () => {
+    fetch(URL)
+      .then((res) =>
+        res.json())
+ 
+      .then((response) => {
+        setData(response);
+      })
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
   return (
     <div>
       <Head>
@@ -29,30 +53,29 @@ export default function Home() {
                   <th scope="col">Nome</th>
                   <th scope="col">E-Mail</th>
                   <th scope="col">Data de expiração</th>
+                  <th scope="col">Código do Cartão</th>
                   <th scope="col">Status</th>
                   <th scope="col">Editar</th>
                   <th scope="col">Excluir</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <th scope="row">1</th>
-                  <td>Adri Silva</td>
-                  <td>adrisilva0002@gmail.com</td>
-                  <td>30/11/2022</td>
-                  <td><span className="badge bg-success">Ativo</span></td>
-                  <td><button type="button" className="btn btn-outline-primary btn-sm"><i className="bi bi-pencil"></i></button></td>
-                  <td><button type="button" className="btn btn-outline-danger btn-sm"><i className="bi bi-trash"></i></button></td>
-                </tr>
-                <tr>
-                  <th scope="row">1</th>
-                  <td>Zé Zinho</td>
-                  <td>papoco@gmail.com</td>
-                  <td>20/06/2022</td>
-                  <td><span className="badge bg-danger">Inativo</span></td>
-                  <td><button type="button" className="btn btn-outline-primary btn-sm"><i className="bi bi-pencil"></i></button></td>
-                  <td><button type="button" className="btn btn-outline-danger btn-sm"><i className="bi bi-trash"></i></button></td>
-                </tr>
+                {data.map((item, i) => (
+                    <tr key={i}>
+                        <td>{item.id}</td>
+                        <td>{item.name}</td>
+                        <td>{item.email}</td>
+                        <td>{item.lastAccess}</td>
+                        <td>{item.rfidCode}</td>
+                        {item.status == "ACTIVE" ? (
+                          <td><span className="badge bg-success">Ativo</span></td> 
+                          ) : (
+                          <td><span className="badge bg-danger">Inativo</span></td>
+                        )}
+                        <td><button type="button" className="btn btn-outline-primary btn-sm"><i className="bi bi-pencil"></i></button></td>
+                        <td><button type="button" className="btn btn-outline-danger btn-sm"><i className="bi bi-trash"></i></button></td>
+                    </tr>
+                ))}
               </tbody>
           </table>
 
